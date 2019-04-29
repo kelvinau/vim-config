@@ -789,6 +789,10 @@
 		<string>[34~</string>
 		<key>F728</key>
 		<string>[3~</string>
+		<key>F729</key>
+		<string>[1~</string>
+		<key>F72B</key>
+		<string>[4~</string>
 		<key>^F702</key>
 		<string>[1;5D</string>
 		<key>^F703</key>
