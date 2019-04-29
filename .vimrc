@@ -2,17 +2,17 @@ execute pathogen#infect()
 syntax on
 filetype plugin indent on
 
-set t_Co=8
+"set t_Co=256
 
 autocmd VimEnter * NERDTree
 autocmd BufEnter * hi clear TODO
 
-hi LineNr cterm=bold ctermfg=2 ctermbg=8 guifg=Yellow
-hi CursorLine cterm=bold ctermbg=8
-hi Visual cterm=bold ctermbg=8
-hi CommandTHighlightColor cterm=bold ctermfg=2 ctermbg=8
-hi Search ctermfg=0 ctermbg=11 guifg=Black guibg=Yellow
-hi MatchParen cterm=bold ctermbg=8 ctermfg=2
+"hi LineNr cterm=bold ctermfg=2 ctermbg=8 guifg=Yellow
+"hi CursorLine cterm=bold ctermbg=8
+"hi Visual cterm=bold ctermbg=8
+hi CommandTHighlightColor cterm=bold ctermfg=2 ctermbg=7
+"hi Search ctermfg=0 ctermbg=11 guifg=Black guibg=Yellow
+"hi MatchParen cterm=bold ctermbg=8 ctermfg=2
 hi Pmenu ctermfg=6 ctermbg=8 guibg=Magenta
 hi PmenuSel ctermfg=10 ctermbg=256 guibg=DarkGrey
 
@@ -53,11 +53,12 @@ set smarttab
 set wildignore=*.pyc,*.gif,*.png,*.jpg,*.jpeg,*.gz,*.tgz,*.def
 set undodir=~/.vim/vimundo
 set undofile
-set visualbell
 set title
 set cursorline
 set completeopt-=preview
 set nofixeol
+
+set noerrorbells visualbell t_vb=
 
 " Triger `autoread` when files changes on disk
 " https://unix.stackexchange.com/questions/149209/refresh-changed-content-of-file-opened-in-vim/383044#383044
