@@ -9,7 +9,7 @@ autocmd BufEnter * hi clear TODO
 
 "hi LineNr cterm=bold ctermfg=2 ctermbg=8 guifg=Yellow
 "hi CursorLine cterm=bold ctermbg=8
-"hi Visual cterm=bold ctermbg=8
+hi Visual cterm=bold ctermbg=0
 hi CommandTHighlightColor cterm=bold ctermfg=2 ctermbg=7
 "hi Search ctermfg=0 ctermbg=11 guifg=Black guibg=Yellow
 "hi MatchParen cterm=bold ctermbg=8 ctermfg=2
