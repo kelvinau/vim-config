@@ -29,7 +29,7 @@ set number
 set autoindent
 set backspace=start,indent,eol
 set whichwrap+=<,>,[,]
-set clipboard=unnamedplus
+set clipboard=unnamed
 set copyindent
 set expandtab
 set hidden
@@ -70,7 +70,7 @@ autocmd FileChangedShellPost *
   \ echohl WarningMsg | echo "File changed on disk. Buffer reloaded." | echohl None
 
 " Remove trailing whitespace
-autocmd BufWritePre * %s/\s\+$//e
+"autocmd BufWritePre * %s/\s\+$//e
 
 let NERDTreeAutoDeleteBuffer = 1
 let NERDTreeMinimalUI = 1
@@ -121,6 +121,7 @@ autocmd FileType python set equalprg=autopep8\ -
 " let g:autopep8_on_save = 1
 let g:autopep8_disable_show_diff=1
 let g:syntastic_javascript_checkers=['eslint']
+let g:syntastic_typescript_checker=['eslint']
 let g:syntastic_always_populate_loc_list = 2
 let g:syntastic_auto_loc_list = 0
 " For Angular
