@@ -121,7 +121,8 @@ autocmd FileType python set equalprg=autopep8\ -
 " let g:autopep8_on_save = 1
 let g:autopep8_disable_show_diff=1
 let g:syntastic_javascript_checkers=['eslint']
-let g:syntastic_typescript_checker=['eslint']
+let g:syntastic_typescript_checkers=['eslint']
+let g:syntastic_typescript_ext=['.ts,.tsx']
 let g:syntastic_always_populate_loc_list = 2
 let g:syntastic_auto_loc_list = 0
 " For Angular
