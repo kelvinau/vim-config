@@ -13,7 +13,7 @@ autocmd BufEnter * hi clear TODO
 "hi CursorLine cterm=bold ctermbg=8
 hi Visual ctermbg=232
 hi CommandTHighlightColor cterm=bold ctermfg=2 ctermbg=7
-hi Search ctermfg=236 ctermbg=227
+hi Search ctermfg=236 ctermbg=222
 "hi MatchParen cterm=bold ctermbg=8 ctermfg=2
 hi Pmenu ctermfg=6 ctermbg=8 guibg=Magenta
 hi PmenuSel ctermfg=10 ctermbg=256 guibg=DarkGrey
