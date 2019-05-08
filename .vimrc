@@ -7,14 +7,20 @@ filetype plugin indent on
 autocmd VimEnter * NERDTree
 autocmd BufEnter * hi clear TODO
 
+" Color Code: https://upload.wikimedia.org/wikipedia/commons/1/15/Xterm_256color_chart.svg
+" Only ctermfg and ctermbg work
 "hi LineNr cterm=bold ctermfg=2 ctermbg=8 guifg=Yellow
 "hi CursorLine cterm=bold ctermbg=8
-hi Visual cterm=bold ctermbg=0
+hi Visual ctermbg=232
 hi CommandTHighlightColor cterm=bold ctermfg=2 ctermbg=7
-"hi Search ctermfg=0 ctermbg=11 guifg=Black guibg=Yellow
+hi Search ctermfg=236 ctermbg=227
 "hi MatchParen cterm=bold ctermbg=8 ctermfg=2
 hi Pmenu ctermfg=6 ctermbg=8 guibg=Magenta
 hi PmenuSel ctermfg=10 ctermbg=256 guibg=DarkGrey
+" Error
+hi SpellBad ctermfg=015 ctermbg=166
+" Warning
+hi SpellCap ctermfg=000 ctermbg=245
 
 xnoremap p pgvy
 nnoremap <F7> :noh<CR>
