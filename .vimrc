@@ -165,4 +165,6 @@ let g:vue_disable_pre_processors=1
 " let g:prettier#quickfix_enabled = 0
 " autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql,*.md,*.vue Prettier
 "
-
+" jsx
+let g:jsx_ext_required = 1
+autocmd BufRead,BufNewFile *.tsx setlocal syntax=javascript.jsx
