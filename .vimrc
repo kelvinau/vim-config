@@ -1,3 +1,17 @@
+set nocompatible              " be iMproved, required
+filetype off                  " required
+
+" set the runtime path to include Vundle and initialize
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+
+" let Vundle manage Vundle, required
+Plugin 'VundleVim/Vundle.vim'
+Plugin 'leafgarland/typescript-vim'
+Plugin 'peitalin/vim-jsx-typescript'
+" All of your Plugins must be added before the following line
+call vundle#end()            " required
+
 execute pathogen#infect()
 syntax on
 filetype plugin indent on
@@ -155,7 +169,5 @@ let g:vue_disable_pre_processors=1
 " let g:prettier#autoformat = 0
 " let g:prettier#quickfix_enabled = 0
 " autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql,*.md,*.vue Prettier
-"
-" jsx
-let g:jsx_ext_required = 1
-autocmd BufRead,BufNewFile *.tsx setlocal syntax=javascript.jsx
+" set filetypes as typescript.jsx
+autocmd BufNewFile,BufRead *.tsx,*.jsx set filetype=typescript.jsx
