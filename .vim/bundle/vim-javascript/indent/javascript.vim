@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: September 18, 2017
+" Last Change: December 4, 2017
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -87,22 +87,22 @@ function s:SynAt(l,c)
 endfunction
 
 function s:ParseCino(f)
-  let [divider, n, cstr] = [0] + matchlist(&cino,
-        \ '\%(.*,\)\=\%(\%d'.char2nr(a:f).'\(-\)\=\([.s0-9]*\)\)\=')[1:2]
-  for c in split(cstr,'\zs')
-    if c == '.' && !divider
+  let [s, n, divider] = [strridx(&cino, a:f)+1, '', 0]
+  while s && &cino[ s ] =~ '[^,]'
+    if &cino[ s ] == '.'
       let divider = 1
-    elseif c ==# 's'
+    elseif &cino[ s ] ==# 's'
       if n !~ '\d'
         return n . s:sw() + 0
       endif
       let n = str2nr(n) * s:sw()
       break
     else
-      let [n, divider] .= [c, 0]
+      let [n, divider] .= [&cino[ s ], 0]
     endif
-  endfor
-  return str2nr(n) / max([str2nr(divider),1])
+    let s += 1
+  endwhile
+  return str2nr(n) / max([divider, 1])
 endfunction
 
 " Optimized {skip} expr, only callable from the search loop which
@@ -119,11 +119,14 @@ function s:SkipFunc()
     if eval(s:skip_expr)
       return 1
     endif
-  elseif search('\m`\|\${\|\*\/','nW'.s:z,s:looksyn) && eval(s:skip_expr)
-    let s:check_in = 1
-    return 1
+  elseif search('\m`\|\${\|\*\/','nW'.s:z,s:looksyn)
+    if eval(s:skip_expr)
+      let s:check_in = 1
+      return 1
+    endif
+  else
+    let s:synid_cache[:] += [[line2byte('.') + col('.') - 1], ['']]
   endif
-  let s:synid_cache[:] += [[line2byte('.') + col('.') - 1], ['']]
   let [s:looksyn, s:top_col] = getpos('.')[1:2]
 endfunction
 
@@ -203,18 +206,15 @@ function s:ExprCol()
   let bal = 0
   while s:SearchLoop('[{}?:]','bW',s:skip_expr)
     if s:LookingAt() == ':'
-      if getline('.')[col('.')-2] == ':'
-        call cursor(0,col('.')-1)
-        continue
-      endif
-      let bal -= 1
+      let bal -= !search('\m:\%#','bW')
     elseif s:LookingAt() == '?'
       if getline('.')[col('.'):col('.')+1] =~ '^\.\d\@!'
-        continue
+        " ?. conditional chain, not ternary start
       elseif !bal
         return 1
+      else
+        let bal += 1
       endif
-      let bal += 1
     elseif s:LookingAt() == '{'
       return !s:IsBlock()
     elseif !s:GetPair('{','}','bW',s:skip_expr)
@@ -240,18 +240,18 @@ function s:Continues()
 endfunction
 
 " Check if line 'lnum' has a balanced amount of parentheses.
-function s:Balanced(lnum)
-  let [l:open, l:line] = [0, getline(a:lnum)]
-  let pos = match(l:line, '[][(){}]')
+function s:Balanced(lnum,line)
+  let l:open = 0
+  let pos = match(a:line, '[][(){}]')
   while pos != -1
     if s:SynAt(a:lnum,pos + 1) !~? b:syng_strcom
-      let l:open += match(' ' . l:line[pos],'[[({]')
+      let l:open += matchend(a:line[pos],'[[({]')
       if l:open < 0
         return
       endif
     endif
-    let pos = match(l:line, !l:open ? '[][(){}]' : '()' =~ l:line[pos] ?
-          \ '[()]' : '{}' =~ l:line[pos] ? '[{}]' : '[][]', pos + 1)
+    let pos = match(a:line, !l:open ? '[][(){}]' : '()' =~ a:line[pos] ?
+          \ '[()]' : '{}' =~ a:line[pos] ? '[{}]' : '[][]', pos + 1)
   endwhile
   return !l:open
 endfunction
@@ -264,8 +264,10 @@ function s:OneScope()
           \ s:Pure('s:PreviousToken') != '.' && !(tok == 'while' && s:DoWhile())
   elseif s:Token() =~# '^else$\|^do$'
     return s:Pure('s:PreviousToken') != '.'
+  elseif strpart(getline('.'),col('.')-2,2) == '=>'
+    call cursor(0,col('.')-1)
+    return s:PreviousToken() != ')' || s:GetPair('(', ')', 'bW', s:skip_expr)
   endif
-  return strpart(getline('.'),col('.')-2,2) == '=>'
 endfunction
 
 function s:DoWhile()
@@ -289,9 +291,9 @@ endfunction
 " encloses the entire context, 'cont' if whether a:firstline is a continued
 " expression, which could have started in a braceless context
 function s:IsContOne(cont)
-  let [l:num, b_l] = [b:js_cache[1] + !b:js_cache[1], 0]
-  let pind = b:js_cache[1] ? indent(b:js_cache[1]) + s:sw() : 0
-  let ind = indent('.') + !a:cont
+  let [l:num, pind] = b:js_cache[1] ?
+        \ [b:js_cache[1], indent(b:js_cache[1]) + s:sw()] : [1,0]
+  let [ind, b_l] = [indent('.') + !a:cont, 0]
   while line('.') > l:num && ind > pind || line('.') == l:num
     if indent('.') < ind && s:OneScope()
       let b_l += 1
@@ -309,8 +311,8 @@ function s:IsContOne(cont)
 endfunction
 
 function s:IsSwitch()
-  call call('cursor',b:js_cache[1:])
-  return search('\m\C\%#.\_s*\%(\%(\/\/.*\_$\|\/\*\_.\{-}\*\/\)\@>\_s*\)*\%(case\|default\)\>','nWc'.s:z)
+  return search(printf('\m\C\%%%dl\%%%dc%s',b:js_cache[1],b:js_cache[2],
+        \ '{\_s*\%(\%(\/\/.*\_$\|\/\*\_.\{-}\*\/\)\@>\_s*\)*\%(case\|default\)\>'),'nW'.s:z)
 endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
@@ -350,28 +352,26 @@ function GetJavascriptIndent()
 
   " start with strings,comments,etc.
   if s:stack[-1] =~? 'comment\|doc'
-    if l:line =~ '^\s*\*'
-      return cindent(v:lnum)
-    elseif l:line !~ '^\s*\/[/*]'
-      return -1
+    if l:line !~ '^\s*\/[/*]'
+      return l:line =~ '^\s*\*' ? cindent(v:lnum) : -1
     endif
   elseif s:stack[-1] =~? b:syng_str
-    if b:js_cache[0] == v:lnum - 1 && s:Balanced(v:lnum-1)
+    if b:js_cache[0] == v:lnum - 1 && s:Balanced(v:lnum-1,getline(v:lnum-1))
       let b:js_cache[0] = v:lnum
     endif
     return -1
   endif
 
-  let s:l1 = max([0,prevnonblank(v:lnum) - (s:rel ? 2000 : 1000),
-        \ get(get(b:,'hi_indent',{}),'blocklnr')])
+  let nest = get(get(b:,'hi_indent',{}),'blocklnr')
+  let s:l1 = max([0, prevnonblank(v:lnum) - (s:rel ? 2000 : 1000), nest])
   call cursor(v:lnum,1)
   if s:PreviousToken() is ''
     return
   endif
-  let [l:lnum, pline] = [line('.'), getline('.')[:col('.')-1]]
+  let [l:lnum, lcol, pline] = getpos('.')[1:2] + [getline('.')[:col('.')-1]]
 
   let l:line = substitute(l:line,'^\s*','','')
-  let l:line_raw = l:line
+  let l:line_s = l:line[0]
   if l:line[:1] == '/*'
     let l:line = substitute(l:line,'^\%(\/\*.\{-}\*\/\s*\)*','','')
   endif
@@ -383,7 +383,7 @@ function GetJavascriptIndent()
   call cursor(v:lnum,1)
   let idx = index([']',')','}'],l:line[0])
   if b:js_cache[0] > l:lnum && b:js_cache[0] < v:lnum ||
-        \ b:js_cache[0] == l:lnum && s:Balanced(l:lnum)
+        \ b:js_cache[0] == l:lnum && s:Balanced(l:lnum,pline)
     call call('cursor',b:js_cache[1:])
   else
     let [s:looksyn, s:top_col, s:check_in, s:l1] = [v:lnum - 1,0,0,
@@ -421,7 +421,7 @@ function GetJavascriptIndent()
       endif
     endif
     if idx == -1 && pline[-1:] !~ '[{;]'
-      call cursor(l:lnum, len(pline))
+      call cursor(l:lnum, lcol)
       let sol = matchstr(l:line,s:opfirst)
       if sol is '' || sol == '/' && s:SynAt(v:lnum,
             \ 1 + len(getline(v:lnum)) - len(l:line)) =~? 'regex'
@@ -437,14 +437,15 @@ function GetJavascriptIndent()
       else
         let is_op = s:sw()
       endif
-      call cursor(l:lnum, len(pline))
+      call cursor(l:lnum, lcol)
       let b_l = s:Nat(s:IsContOne(is_op) - (!is_op && l:line =~ '^{')) * s:sw()
     endif
-  elseif idx.s:LookingAt().&cino =~ '^-1(.*(' && (search('\m\S','nbW',num) || s:ParseCino('U'))
+  elseif idx == -1 && s:LookingAt() == '(' && &cino =~ '(' &&
+        \ (search('\m\S','nbW',num) || s:ParseCino('U'))
     let pval = s:ParseCino('(')
     if !pval
       let [Wval, vcol] = [s:ParseCino('W'), virtcol('.')]
-      if search('\m\S','W',num)
+      if search('\m'.get(g:,'javascript_indent_W_pat','\S'),'W',num)
         return s:ParseCino('w') ? vcol : virtcol('.')-1
       endif
       return Wval ? s:Nat(num_ind + Wval) : vcol
@@ -454,7 +455,7 @@ function GetJavascriptIndent()
 
   " main return
   if l:line =~ '^[])}]\|^|}'
-    if l:line_raw[0] == ')'
+    if l:line_s == ')'
       if s:ParseCino('M')
         return indent(l:lnum)
       elseif num && &cino =~# 'm' && !s:ParseCino('m')
@@ -464,6 +465,8 @@ function GetJavascriptIndent()
     return num_ind
   elseif num
     return s:Nat(num_ind + get(l:,'case_offset',s:sw()) + l:switch_offset + b_l + is_op)
+  elseif nest
+    return indent(nextnonblank(nest+1)) + b_l + is_op
   endif
   return b_l + is_op
 endfunction
