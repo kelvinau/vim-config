@@ -45,6 +45,9 @@ noremap <ScrollWheelUp> 2k
 cabbr Ack Ack!
 cnoremap w!! w !sudo tee % >/dev/null
 
+" Disable r in normal mode in case of fn + r
+nnoremap r <nop>
+
 set number
 set autoindent
 set backspace=start,indent,eol
@@ -175,8 +178,9 @@ autocmd FileType vue syntax sync fromstart
 
 let g:vue_disable_pre_processors=1
 
+" disable autoformat as it will change history of other files
 " let g:prettier#autoformat = 0
-" let g:prettier#quickfix_enabled = 0
-" autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql,*.md,*.vue Prettier
+" " let g:prettier#quickfix_enabled = 0
+" autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql,*.md,*.vue,*.yaml,*.html PrettierAsync
 " set filetypes as typescript.jsx
 autocmd BufNewFile,BufRead *.tsx,*.jsx set filetype=typescript.jsx
