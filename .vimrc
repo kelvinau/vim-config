@@ -12,11 +12,16 @@ Plugin 'peitalin/vim-jsx-typescript'
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 
+call plug#begin('~/.vim/plugged')
+Plug 'kamykn/spelunker.vim'
+call plug#end()
+
+
 execute pathogen#infect()
 syntax on
 filetype plugin indent on
 
-"set t_Co=256
+set t_Co=64
 
 autocmd VimEnter * NERDTree
 autocmd BufEnter * hi clear TODO
