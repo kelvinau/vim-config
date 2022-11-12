@@ -1,173 +1,99 @@
-set nocompatible              " be iMproved, required
-filetype off                  " required
+" Don't try to be vi compatible
+set nocompatible
 
-" set the runtime path to include Vundle and initialize
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
+" Helps force plugins to load correctly when it is turned back on below
+filetype off
 
-" let Vundle manage Vundle, required
-Plugin 'VundleVim/Vundle.vim'
-Plugin 'leafgarland/typescript-vim'
-Plugin 'peitalin/vim-jsx-typescript'
-" All of your Plugins must be added before the following line
-call vundle#end()            " required
+" TODO: Load plugins here (pathogen or vundle)
 
-execute pathogen#infect()
+" Turn on syntax highlighting
 syntax on
+
+" For plugins to load correctly
 filetype plugin indent on
 
-set t_Co=8
+" TODO: Pick a leader key
+" let mapleader = ","
 
-autocmd VimEnter * NERDTree
-autocmd BufEnter * hi clear TODO
-
-hi LineNr cterm=bold ctermfg=2 ctermbg=8 guifg=Yellow
-hi CursorLine cterm=bold ctermbg=8
-hi Visual cterm=bold ctermbg=8
-hi CommandTHighlightColor cterm=bold ctermfg=2 ctermbg=8
-hi Search ctermfg=0 ctermbg=11 guifg=Black guibg=Yellow
-hi MatchParen cterm=bold ctermbg=8 ctermfg=2
-hi Pmenu ctermfg=6 ctermbg=8 guibg=Magenta
-hi PmenuSel ctermfg=10 ctermbg=256 guibg=DarkGrey
-
-xnoremap p pgvy
-nnoremap <F7> :noh<CR>
-noremap <S-Down> 10j
-noremap <S-Up> 10k
-noremap <ScrollWheelDown> 2j
-noremap <ScrollWheelUp> 2k
-cabbr Ack Ack!
-cnoremap w!! w !sudo tee % >/dev/null
-
-set number
-set autoindent
-set backspace=start,indent,eol
-set whichwrap+=<,>,[,]
-set clipboard=unnamedplus
-set copyindent
-set expandtab
-set hidden
-set hlsearch
-set ignorecase
-set incsearch
-set laststatus=2
-set lazyredraw
-set nomodeline
+" Security
 set modelines=0
-set mouse=a
-set pastetoggle=<F2>
+
+" Show line numbers
+set number
+
+" Show file stats
 set ruler
+
+" Encoding
+set encoding=utf-8
+
+" Whitespace
+set wrap
+set textwidth=79
+set formatoptions=tcqrn1
+set tabstop=2
 set shiftwidth=2
 set softtabstop=2
-set tabstop=2
-set shortmess=filnxtToOc
-set showmatch
+set expandtab
+set noshiftround
+
+" Cursor motion
+set scrolloff=3
+set backspace=indent,eol,start
+set matchpairs+=<:> " use % to jump between pairs
+runtime! macros/matchit.vim
+
+" Move up/down editor lines
+nnoremap j gj
+nnoremap k gk
+
+" Allow hidden buffers
+set hidden
+
+" Rendering
+set ttyfast
+
+" Status bar
+set laststatus=2
+
+" Last line
+set showmode
+set showcmd
+
+" Searching
+nnoremap / /\v
+vnoremap / /\v
+set hlsearch
+set incsearch
+set ignorecase
 set smartcase
-set smarttab
-set wildignore=*.pyc,*.gif,*.png,*.jpg,*.jpeg,*.gz,*.tgz,*.def
-set undodir=~/.vim/vimundo
-set undofile
-set visualbell
-set title
-set cursorline
-set completeopt-=preview
-set nofixeol
+set showmatch
+map <leader><space> :let @/=''<cr> " clear search
 
-" Triger `autoread` when files changes on disk
-" https://unix.stackexchange.com/questions/149209/refresh-changed-content-of-file-opened-in-vim/383044#383044
-" https://vi.stackexchange.com/questions/13692/prevent-focusgained-autocmd-running-in-command-line-editing-mode
-autocmd FocusGained,BufEnter,CursorHold,CursorHoldI * if mode() != 'c' | checktime | endif
-" Notification after file change
-" https://vi.stackexchange.com/questions/13091/autocmd-event-for-autoread
-autocmd FileChangedShellPost *
-  \ echohl WarningMsg | echo "File changed on disk. Buffer reloaded." | echohl None
+" Remap help key.
+inoremap <F1> <ESC>:set invfullscreen<CR>a
+nnoremap <F1> :set invfullscreen<CR>
+vnoremap <F1> :set invfullscreen<CR>
 
-" Remove trailing whitespace
-autocmd BufWritePre * %s/\s\+$//e
+" Textmate holdouts
 
-let NERDTreeAutoDeleteBuffer = 1
-let NERDTreeMinimalUI = 1
-let NERDTreeDirArrows = 1
+" Formatting
+map <leader>q gqip
 
-" Check if NERDTree is open or active
-function! IsNERDTreeOpen()
-  return exists("t:NERDTreeBufName") && (bufwinnr(t:NERDTreeBufName) != -1)
-endfunction
+" Visualize tabs and newlines
+set listchars=tab:▸\ ,eol:¬
+" Uncomment this to enable by default:
+" set list " To enable by default
+" Or use your leader key + l to toggle on/off
+map <leader>l :set list!<CR> " Toggle tabs and EOL
 
-" Call NERDTreeFind iff NERDTree is active, current window contains a modifiable
-" file, and we're not in vimdiff
-function! SyncTree()
-  if g:command_t_opened != 1 && &modifiable && IsNERDTreeOpen() && strlen(expand('%')) > 0 && !&diff
-    try
-      NERDTreeFind
-      wincmd p
-    catch
-      echo v:exception
-    endtry
-  endif
-  let g:command_t_opened=0
-endfunction
+" Color scheme (terminal)
+set t_Co=256
+set background=dark
+let g:solarized_termcolors=256
+let g:solarized_termtrans=1
+" put https://raw.github.com/altercation/vim-colors-solarized/master/colors/solarized.vim
+" in ~/.vim/colors/ and uncomment:
+colorscheme solarized
 
-" Highlight currently open buffer in NERDTree
-let g:command_t_opened = 0
-autocmd BufEnter * call SyncTree()
-
-nnoremap <leader>q :bp<cr>:bd #<cr>
-
-
-let g:ycm_disable_for_files_larger_than_kb = 100
-
-let g:CommandTMaxHeight = 30
-let g:CommandTMaxFiles=500000
-let g:CommandTInputDebounce=50
-let g:CommandTFileScanner="git"
-let g:CommandTMaxCachedDirectories=10
-let g:CommandTSmartCase=1
-let g:CommandTRecursiveMatch=0
-let g:CommandTHighlightColor="CommandTHighlightColor"
-
-nnoremap <C-C> :let g:command_t_opened=0<CR>
-
-set statusline=%f\ %m\ %#warningmsg#%{SyntasticStatuslineFlag()}%*
-let g:syntastic_python_flake8_args='--ignore=E123,E126,E121,E501,E722,W293,W391,F841,F401,E116,E251'
-autocmd FileType python set equalprg=autopep8\ -
-" let g:autopep8_on_save = 1
-let g:autopep8_disable_show_diff=1
-let g:syntastic_javascript_checkers=['eslint']
-let g:syntastic_always_populate_loc_list = 2
-let g:syntastic_auto_loc_list = 0
-" For Angular
-let g:syntastic_html_tidy_ignore_errors=[" proprietary attribute " ,"trimming empty \<", "inserting implicit ", "unescaped \&" , "lacks \"action", "lacks value", "lacks \"src", "is not recognized!", "discarding unexpected", "replacing obsolete "]
-
-let g:NERDSpaceDelims = 1
-let g:NERDCompactSexyComs = 1
-
-let g:ft = ''
-function! NERDCommenter_before()
-  if &ft == 'vue'
-    let g:ft = 'vue'
-    let stack = synstack(line('.'), col('.'))
-    if len(stack) > 0
-      let syn = synIDattr((stack)[0], 'name')
-      if len(syn) > 0
-        exe 'setf ' . substitute(tolower(syn), '^vue_', '', '')
-      endif
-    endif
-  endif
-endfunction
-function! NERDCommenter_after()
-  if g:ft == 'vue'
-    setf vue
-    let g:ft = ''
-  endif
-endfunction
-
-autocmd FileType vue syntax sync fromstart
-
-let g:vue_disable_pre_processors=1
-
-" let g:prettier#autoformat = 0
-" let g:prettier#quickfix_enabled = 0
-" autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql,*.md,*.vue Prettier
-" set filetypes as typescript.jsx
-autocmd BufNewFile,BufRead *.tsx,*.jsx set filetype=typescript.jsx
+highlight LineNr term=bold cterm=NONE ctermfg=DarkGrey ctermbg=NONE gui=NONE guifg=DarkGrey guibg=NONE
